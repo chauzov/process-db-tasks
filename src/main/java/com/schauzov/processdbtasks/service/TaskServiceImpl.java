@@ -7,7 +7,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +19,7 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private static final Logger logger = LogManager.getLogger(TaskServiceImpl.class);
+    private Set<Long> processingQueue = new HashSet<>();
 
     @Autowired
     public TaskServiceImpl(TaskRepository taskRepository) {
@@ -29,7 +32,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void processTasks() {
+        // Do no start processing when it is already in progress
+        if(!this.processingQueue.isEmpty()) {
+            return;
+        }
+
         List<Task> tasks = taskRepository.findByStatus(Status.NEW.getValue());
+        tasks.forEach(task -> this.processingQueue.add(task.getTaskId()));
 
         ExecutorService service = Executors.newFixedThreadPool(3);
         tasks.forEach(task -> service.execute(new TaskRunnable(task)));
@@ -42,6 +51,7 @@ public class TaskServiceImpl implements TaskService {
         TimeUnit.MILLISECONDS.sleep(task.getExecTime());
         task.setStatus(Status.COMPLETED);
         taskRepository.save(task);
+        this.processingQueue.remove(task.getTaskId());
         logger.info("The task with ID {} has completed", task.getTaskId());
     }
 

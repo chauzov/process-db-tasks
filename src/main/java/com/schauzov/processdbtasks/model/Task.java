@@ -6,7 +6,7 @@ import com.schauzov.processdbtasks.service.TaskService;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "task")
+@Table(name = "task", indexes = { @Index(name = "idx_task", columnList = "task_id,status") })
 public class Task {
     @Id
     @SequenceGenerator(name = "task_seq", sequenceName = "task_seq", allocationSize = 1)
