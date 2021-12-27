@@ -5,6 +5,7 @@ import com.schauzov.processdbtasks.model.Task;
 public interface TaskService {
     public enum Status {
         NEW('n'),
+        SCHEDULED('s'),
         RUNNING('r'),
         COMPLETED('c');
 

@@ -25,7 +25,7 @@ public class ProcessDbTasksApplication {
 	public ProcessDbTasksApplication() {
 	}
 
-	@Scheduled(fixedDelay = 3000L)
+	@Scheduled(fixedDelay = 100L)
 	void processTasks() {
 		taskService.processTasks();
 	}
